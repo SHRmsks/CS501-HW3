@@ -25,40 +25,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.example.hw31.ui.theme.HW31Theme
+import org.xmlpull.v1.XmlPullParser
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            val dataset =
-                listOf(
-                    PhotoType(R.drawable.pic1, "pic1"),
-                    PhotoType(R.drawable.pic2, "pic2"),
-                    PhotoType(R.drawable.pic3, "pic3"),
-                    PhotoType(R.drawable.pic4, "pic4"),
-                    PhotoType(R.drawable.pic5, "pic5"),
-                    PhotoType(R.drawable.pic6, "pic6"),
-                    PhotoType(R.drawable.pic7, "pic7"),
-                    PhotoType(R.drawable.pic8, "pic8"),
-                    PhotoType(R.drawable.pic9, "pic9"),
-                    PhotoType(R.drawable.pic10, "pic10"),
-                    PhotoType(R.drawable.pic11, "pic11"),
-                    PhotoType(R.drawable.pic12, "pic12"),
-                    PhotoType(R.drawable.pic13, "pic13"),
-                    PhotoType(R.drawable.pic14, "pic14"),
-                    PhotoType(R.drawable.pic15, "pic15"),
-                    PhotoType(R.drawable.pic16, "pic16"),
-                    PhotoType(R.drawable.pic17, "pic17"),
-                    PhotoType(R.drawable.pic18, "pic18"),
-                    PhotoType(R.drawable.pic19, "pic19"),
-                    PhotoType(R.drawable.pic20, "pic20"),
-                )
+            var dataset = mutableListOf<PhotoType>()
+            val parser =
+                LocalContext.current
+                    .resources
+                    .getXml(R.xml.photos)
+            var type = parser.eventType
+            while (type != XmlPullParser.END_DOCUMENT) {
+                if (type == XmlPullParser.START_TAG && parser.name == "photo") {
+                    val name = parser.getAttributeValue(null, "name")
+                    val title = parser.getAttributeValue(null, "title")
+                    val url = LocalContext.current.resources.getIdentifier(name, "drawable", LocalContext.current.packageName)
+                    if (url != null) {
+                        dataset.add(PhotoType(url, title))
+                    }
+                }
+                type = parser.next()
+            }
             HW31Theme {
                 imageLoader(imgurl = dataset)
             }
@@ -75,7 +71,6 @@ data class PhotoType(
 fun imgExhibitor(
     url: Int,
     title: String,
-
 ) {
     var clicked by remember { mutableStateOf(false) }
     var ini by remember { mutableStateOf(true) }
@@ -87,7 +82,6 @@ fun imgExhibitor(
                 .clickable {
                     clicked = !clicked
                     ini = false
-
                 },
     ) {
         LaunchedEffect(ini, clicked) {
@@ -111,7 +105,6 @@ fun imgExhibitor(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun imageLoader(imgurl: List<PhotoType>) {
-
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Row(
             modifier =
@@ -126,40 +119,33 @@ fun imageLoader(imgurl: List<PhotoType>) {
                 items(imgurl) { item ->
                     val itemURL = item.url
                     val itemTitle = item.title
-                    imgExhibitor(title = itemTitle, url = itemURL, )
+                    imgExhibitor(title = itemTitle, url = itemURL)
                 }
             }
         }
-
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun test() {
-    val dataset =
-        listOf(
-            PhotoType(R.drawable.pic1, "pic1"),
-            PhotoType(R.drawable.pic2, "pic2"),
-            PhotoType(R.drawable.pic3, "pic3"),
-            PhotoType(R.drawable.pic4, "pic4"),
-            PhotoType(R.drawable.pic5, "pic5"),
-            PhotoType(R.drawable.pic6, "pic6"),
-            PhotoType(R.drawable.pic7, "pic7"),
-            PhotoType(R.drawable.pic8, "pic8"),
-            PhotoType(R.drawable.pic9, "pic9"),
-            PhotoType(R.drawable.pic10, "pic10"),
-            PhotoType(R.drawable.pic11, "pic11"),
-            PhotoType(R.drawable.pic12, "pic12"),
-            PhotoType(R.drawable.pic13, "pic13"),
-            PhotoType(R.drawable.pic14, "pic14"),
-            PhotoType(R.drawable.pic15, "pic15"),
-            PhotoType(R.drawable.pic16, "pic16"),
-            PhotoType(R.drawable.pic17, "pic17"),
-            PhotoType(R.drawable.pic18, "pic18"),
-            PhotoType(R.drawable.pic19, "pic19"),
-            PhotoType(R.drawable.pic20, "pic20"),
-        )
+    var dataset = mutableListOf<PhotoType>()
+    val parser =
+        LocalContext.current
+            .resources
+            .getXml(R.xml.photos)
+    var type = parser.eventType
+    while (type != XmlPullParser.END_DOCUMENT) {
+        if (type == XmlPullParser.START_TAG && parser.name == "photo") {
+            val name = parser.getAttributeValue(null, "name")
+            val title = parser.getAttributeValue(null, "title")
+            val url = LocalContext.current.resources.getIdentifier(name, "drawable", LocalContext.current.packageName)
+            if (url != null) {
+                dataset.add(PhotoType(url, title))
+            }
+        }
+        type = parser.next()
+    }
     HW31Theme {
         imageLoader(imgurl = dataset)
     }
